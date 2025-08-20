@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Gmail Account Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .login-card {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s ease;
+        }
+        .login-card:hover {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .input-field {
+            transition: all 0.3s ease;
+        }
+        .input-field:focus-within {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .btn-login {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            transition: all 0.3s ease;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="login-card bg-white rounded-xl p-8 w-full max-w-md">
+        <div class="text-center mb-8">
+            <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/75babef5-5c0a-4fa1-99e7-2a92f53bba49.png" 
+                 alt="Gmail Management System Logo"
+                 class="h-16 w-16 mx-auto mb-4">
+            <h1 class="text-2xl font-bold text-gray-800">Gmail Account Management</h1>
+            <p class="text-gray-600 mt-2">Please sign in to access the admin panel</p>
+        </div>
+
+        <form id="loginForm" class="space-y-6">
+            <div class="input-field border border-gray-200 rounded-lg p-3 flex items-center">
+                <div class="mr-3 text-gray-400">
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <label for="username" class="block text-xs font-medium text-gray-500 mb-1">Username</label>
+                    <input type="text" 
+                           id="username" 
+                           name="username" 
+                           required 
+                           class="w-full focus:outline-none text-gray-800 placeholder-gray-400"
+                           placeholder="Enter your username">
+                </div>
+            </div>
+
+            <div class="input-field border border-gray-200 rounded-lg p-3 flex items-center">
+                <div class="mr-3 text-gray-400">
+                    <i class="fas fa-lock text-xl"></i>
+                </div>
+                <div class="flex-1">
+                    <label for="password" class="block text-xs font-medium text-gray-500 mb-1">Password</label>
+                    <input type="password" 
+                           id="password" 
+                           name="password" 
+                           required 
+                           class="w-full focus:outline-none text-gray-800 placeholder-gray-400"
+                           placeholder="Enter your password">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                </div>
+
+                <div class="text-sm">
+                    <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="btn-login w-full py-3 px-4 rounded-lg text-white font-semibold flex items-center justify-center">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Sign In
+                </button>
+            </div>
+        </form>
+
+        <div class="mt-6 text-center text-sm text-gray-600">
+            <p>Don't have an account? <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Contact Administrator</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Simple validation (in a real app, this would be handled server-side)
+            if(username === 'admin' && password === 'admin123') {
+                // Redirect to admin page
+                window.location.href = 'gmail_admin.html';
+            } else {
+                alert('Invalid username or password. Try admin/admin123 for demo.');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -504,8 +504,8 @@
 
     <script>
         // Data dummy
-    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'; // Ganti dengan Project URL Anda
-    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Ganti dengan Anon (public) key Anda
+    const SUPABASE_URL = 'https://vipymadgirqtasaqvnpn.supabase.co'; // Ganti dengan Project URL Anda
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHltYWRnaXJxdGFzYXF2bnBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MDA2NTUsImV4cCI6MjA3MTI3NjY1NX0.NFdHtPAinU7kjztZ8_6zrJT2lm5YIVi3tFPm5KdEKHk'; // Ganti dengan Anon (public) key Anda
     const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
         // Fungsi untuk merender akun ke tabel dan memperbarui statistik
@@ -776,40 +776,52 @@
         }
 
         // Handle submit form tambah
-    document.getElementById('addForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
+document.getElementById('addForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
 
-        const newEmail = document.getElementById('newAccountEmail').value;
-        const newPassword = document.getElementById('newAccountPassword').value;
-        const newType = document.getElementById('newAccountType').value;
-        const newStatus = document.getElementById('newAccountStatus').value;
+    const newEmail = document.getElementById('newAccountEmail').value;
+    const newPassword = document.getElementById('newAccountPassword').value;
+    const newType = document.getElementById('newAccountType').value;
+    const newStatus = document.getElementById('newAccountStatus').value;
 
-        // Supabase akan otomatis mengisi created_at dan last_active jika default value diatur
-        const newAccountData = {
-            email: newEmail,
-            password: newPassword, // Ingat, ini harusnya hash password
-            type: newType,
-            status: newStatus,
-            avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b9f86526-eded-469a-acb6-30531e52f3f6.png'
-        };
+    const newAccountData = {
+        email: newEmail,
+        password: newPassword,
+        type: newType,
+        status: newStatus,
+        avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b9f86526-eded-469a-acb6-30531e52f3f6.png'
+    };
 
-        try {
-            const { data, error } = await supabase
-                .from('accounts')
-                .insert([newAccountData]); // Masukkan data baru
+    try {
+        // Tampilkan indikator loading (opsional, tapi sangat disarankan)
+        // Misalnya, nonaktifkan tombol submit atau tampilkan spinner
+        const submitButton = e.submitter; // Dapatkan tombol yang disubmit
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menambah...'; // Ubah teks tombol
 
-            if (error) {
-                throw error;
-            }
+        const { data, error } = await supabase
+            .from('accounts')
+            .insert([newAccountData])
+            .select(); // Tambahkan .select() untuk mendapatkan data yang baru dimasukkan
 
-            alert('Akun berhasil ditambahkan!');
-            renderAccounts();
-            hideAddModal();
-        } catch (error) {
-            console.error('Error adding account:', error.message);
-            alert('Gagal menambahkan akun: ' + error.message);
+        if (error) {
+            throw error;
         }
-    });
+
+        alert('Akun berhasil ditambahkan!');
+        renderAccounts(); // Muat ulang data di tabel
+        hideAddModal(); // Sembunyikan modal
+    } catch (error) {
+        console.error('Error adding account:', error.message);
+        alert('Gagal menambahkan akun: ' + error.message + '\nSilakan periksa konsol browser untuk detail lebih lanjut.');
+    } finally {
+        // Selalu kembalikan tombol ke keadaan semula
+        const submitButton = e.submitter;
+        submitButton.disabled = false;
+        submitButton.innerHTML = '<i class="fas fa-plus mr-2"></i> Tambah';
+    }
+});
+
     
 
         // Fungsi untuk toggle visibilitas password di form modal

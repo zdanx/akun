@@ -1,0 +1,8 @@
+                    {
+                      "name": "gmail-admin-panel",
+                      "version": "1.0.0",
+                      "scripts": {
+                        "build": "sed -i 'shttps://vipymadgirqtasaqvnpn.supabase.co'\"https://vipymadgirqtasaqvnpn.supabase.co\"'|g' gmail_admin.html && sed -i 's|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHltYWRnaXJxdGFzYXF2bnBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MDA2NTUsImV4cCI6MjA3MTI3NjY1NX0.NFdHtPAinU7kjztZ8_6zrJT2lm5YIVi3tFPm5KdEKHk|'\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHltYWRnaXJxdGFzYXF2bnBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MDA2NTUsImV4cCI6MjA3MTI3NjY1NX0.NFdHtPAinU7kjztZ8_6zrJT2lm5YIVi3tFPm5KdEKHk\"'|g' gmail_admin.html"
+                      }
+                    }
+                    

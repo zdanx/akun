@@ -6,6 +6,7 @@
     <title>Admin Panel - Gmail Account Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -503,22 +504,39 @@
 
     <script>
         // Data dummy
-        let accounts = [
-            { email: 'john.doe@gmail.com', password: 'password123', type: 'Primary', lastActive: 'Today, 08:45 AM', created: '12 Jan, 2021', status: 'active', avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b9f86526-eded-469a-acb6-30531e52f3f6.png' },
-            { email: 'jane.smith@gmail.com', password: 'securepass', type: 'Backup', lastActive: 'Yesterday, 05:20 PM', created: '05 Mar, 2021', status: 'active', avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/50396e61-ac37-4867-86d9-abdb30b59307.png' },
-            { email: 'devteam@company.com', password: 'devpass', type: 'Shared', lastActive: '3 days ago', created: '15 Nov, 2020', status: 'suspended', avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/04b544a5-c8c3-4c76-9eb6-8f9dcecbe202.png' },
-            { email: 'support@domain.com', password: 'supportpass', type: 'Support', lastActive: '1 week ago', created: '22 Feb, 2021', status: 'active', avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/d5b75d14-7c8d-4e01-87d2-0b5f5d982285.png' },
-            { email: 'old.account@gmail.com', password: 'oldpass', type: 'Legacy', lastActive: '1 month ago', created: '14 Sep, 2019', status: 'inactive', avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/745ba3a0-2204-4a1a-9ff6-2856d4307b8c.png' }
-        ];
-
+    const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL'; // Ganti dengan Project URL Anda
+    const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Ganti dengan Anon (public) key Anda
+    const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
         // Fungsi untuk merender akun ke tabel dan memperbarui statistik
-        function renderAccounts() {
-            const tbody = document.querySelector('tbody');
-            tbody.innerHTML = ''; // Kosongkan tabel sebelum merender ulang
+    async function renderAccounts() {
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = '';
 
-            let activeCount = 0;
-            let suspendedCount = 0;
-            let inactiveCount = 0;
+        let activeCount = 0;
+        let suspendedCount = 0;
+        let inactiveCount = 0;
+
+        try {
+            // Ambil data dari tabel 'accounts' di Supabase
+            const { data: accounts, error } = await supabase
+                .from('accounts')
+                .select('*')
+                .order('created_at', { ascending: false }); // Urutkan berdasarkan tanggal dibuat
+
+            if (error) {
+                throw error;
+            }
+
+            if (!accounts || accounts.length === 0) {
+                // Tampilkan pesan jika tidak ada akun
+                tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">No accounts found.</td></tr>`;
+                document.getElementById('totalAccounts').textContent = 0;
+                document.getElementById('activeAccounts').textContent = 0;
+                document.getElementById('suspendedAccounts').textContent = 0;
+                document.getElementById('inactiveAccounts').textContent = 0;
+                return;
+            }
 
             accounts.forEach(account => {
                 const statusClass = {
@@ -527,7 +545,6 @@
                     inactive: 'status-inactive'
                 }[account.status];
 
-                // Hitung statistik
                 if (account.status === 'active') {
                     activeCount++;
                 } else if (account.status === 'suspended') {
@@ -536,16 +553,24 @@
                     inactiveCount++;
                 }
 
+                // Format tanggal dan waktu
+                const lastActiveDate = account.last_active ? new Date(account.last_active).toLocaleString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : 'N/A';
+                const createdDate = account.created_at ? new Date(account.created_at).toLocaleString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric'
+                }) : 'N/A';
+
                 const row = `
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0 h-10 w-10">
-                                    <img class="h-10 w-10 rounded-full" src="${account.avatar}" alt="Gmail account avatar">
+                                    <img class="h-10 w-10 rounded-full" src="${account.avatar || 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b9f86526-eded-469a-acb6-30531e52f3f6.png'}" alt="Gmail account avatar">
                                 </div>
                                 <div class="ml-4">
                                     <div class="text-sm font-medium text-gray-900">${account.email}</div>
-                                    <div class="text-sm text-gray-500">${account.type}</div>
+                                    <div class="text-sm text-gray-500">${account.type || 'Unknown'}</div>
                                 </div>
                             </div>
                         </td>
@@ -555,25 +580,25 @@
                             <i class="fas fa-eye toggle-password-row ml-2 cursor-pointer text-gray-500 hover:text-gray-700" onclick="togglePasswordRow(this)"></i>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900">${account.lastActive}</div>
+                            <div class="text-sm text-gray-900">${lastActiveDate}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-500">${account.created}</div>
+                            <div class="text-sm text-gray-500">${createdDate}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="status-badge ${statusClass}">${account.status.charAt(0).toUpperCase() + account.status.slice(1)}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium relative">
-                            <button onclick="showActionMenu(this)" 
+                            <button onclick="showActionMenu(this)"
                                     class="text-gray-600 hover:text-gray-900 focus:outline-none">
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="action-menu hidden absolute z-10 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                                <button onclick="showEditModal('${account.email}')" 
+                                <button onclick="showEditModal('${account.id}')"
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 w-full text-left">
                                     <i class="fas fa-edit mr-2"></i>Edit
                                 </button>
-                                <button onclick="showDeleteModal('${account.email}')" 
+                                <button onclick="showDeleteModal('${account.id}')"
                                         class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left">
                                     <i class="fas fa-trash-alt mr-2"></i>Hapus
                                 </button>
@@ -584,12 +609,17 @@
                 tbody.insertAdjacentHTML('beforeend', row);
             });
 
-            // Perbarui tampilan statistik
             document.getElementById('totalAccounts').textContent = accounts.length;
             document.getElementById('activeAccounts').textContent = activeCount;
             document.getElementById('suspendedAccounts').textContent = suspendedCount;
             document.getElementById('inactiveAccounts').textContent = inactiveCount;
+
+        } catch (error) {
+            console.error('Error fetching accounts:', error.message);
+            alert('Failed to load accounts: ' + error.message);
         }
+    }
+    
 
         // Fungsi untuk menampilkan/menyembunyikan menu aksi
         function showActionMenu(button) {
@@ -613,6 +643,34 @@
             });
         }
 
+            async function showEditModal(accountId) {
+        try {
+            const { data: account, error } = await supabase
+                .from('accounts')
+                .select('*')
+                .eq('id', accountId) // Cari akun berdasarkan ID
+                .single(); // Harapkan hanya satu hasil
+
+            if (error) {
+                throw error;
+            }
+
+            if (account) {
+                document.getElementById('editEmailOriginal').value = account.id; // Simpan ID akun
+                document.getElementById('editEmail').value = account.email;
+                document.getElementById('editPassword').value = account.password;
+                document.getElementById('editStatus').value = account.status;
+                document.getElementById('editModal').classList.add('active');
+            } else {
+                alert('Account not found!');
+            }
+        } catch (error) {
+            console.error('Error fetching account for edit:', error.message);
+            alert('Failed to load account details: ' + error.message);
+        }
+    }
+    
+
         // Fungsi untuk menampilkan modal edit
         function showEditModal(email) {
             const account = accounts.find(acc => acc.email === email);
@@ -630,6 +688,13 @@
             document.getElementById('editModal').classList.remove('active');
         }
 
+            function showDeleteModal(accountId) {
+        // Anda mungkin ingin mengambil email dari akun berdasarkan ID untuk ditampilkan di modal
+        // Untuk saat ini, kita hanya menampilkan ID
+        document.getElementById('emailToDelete').textContent = accountId;
+        document.getElementById('deleteModal').classList.add('active');
+    }
+    
         // Fungsi untuk menampilkan modal hapus
         function showDeleteModal(email) {
             document.getElementById('emailToDelete').textContent = email;
@@ -642,36 +707,62 @@
         }
 
         // Handle submit form edit
-        document.getElementById('editForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const originalEmail = document.getElementById('editEmailOriginal').value;
-            const newEmail = document.getElementById('editEmail').value;
-            const newPassword = document.getElementById('editPassword').value; // Get new password
-            const newStatus = document.getElementById('editStatus').value;
-            
-            const accountIndex = accounts.findIndex(acc => acc.email === originalEmail);
-            if (accountIndex !== -1) {
-                accounts[accountIndex].email = newEmail;
-                accounts[accountIndex].password = newPassword; // Update password
-                accounts[accountIndex].status = newStatus;
-                // Di aplikasi nyata, kirim update ke server
-                alert('Data berhasil diperbarui!');
-                renderAccounts(); // Render ulang tabel dan perbarui statistik
-                hideEditModal();
+    document.getElementById('editForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const accountId = document.getElementById('editEmailOriginal').value; // Ini sekarang adalah ID
+        const newEmail = document.getElementById('editEmail').value;
+        const newPassword = document.getElementById('editPassword').value;
+        const newStatus = document.getElementById('editStatus').value;
+
+        try {
+            const { data, error } = await supabase
+                .from('accounts')
+                .update({
+                    email: newEmail,
+                    password: newPassword, // Ingat, ini harusnya hash password
+                    status: newStatus,
+                    last_active: new Date().toISOString() // Perbarui waktu aktif terakhir
+                })
+                .eq('id', accountId); // Perbarui berdasarkan ID
+
+            if (error) {
+                throw error;
             }
-        });
+
+            alert('Data berhasil diperbarui!');
+            renderAccounts();
+            hideEditModal();
+        } catch (error) {
+            console.error('Error updating account:', error.message);
+            alert('Gagal memperbarui akun: ' + error.message);
+        }
+    });
+    
 
         // Handle konfirmasi hapus
-        function confirmDelete() {
-            const email = document.getElementById('emailToDelete').textContent;
-            
-            accounts = accounts.filter(acc => acc.email !== email);
-            // Di aplikasi nyata, kirim permintaan hapus ke server
+    async function confirmDelete() {
+        const accountId = document.getElementById('emailToDelete').textContent; // Ini sekarang adalah ID
+
+        try {
+            const { error } = await supabase
+                .from('accounts')
+                .delete()
+                .eq('id', accountId); // Hapus berdasarkan ID
+
+            if (error) {
+                throw error;
+            }
+
             alert('Akun berhasil dihapus!');
-            renderAccounts(); // Render ulang tabel dan perbarui statistik
+            renderAccounts();
             hideDeleteModal();
+        } catch (error) {
+            console.error('Error deleting account:', error.message);
+            alert('Gagal menghapus akun: ' + error.message);
         }
+    }
+    
 
         // Fungsi untuk menampilkan modal tambah
         function showAddModal() {
@@ -685,37 +776,41 @@
         }
 
         // Handle submit form tambah
-        document.getElementById('addForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const newEmail = document.getElementById('newAccountEmail').value;
-            const newPassword = document.getElementById('newAccountPassword').value; // Get new password
-            const newType = document.getElementById('newAccountType').value;
-            const newStatus = document.getElementById('newAccountStatus').value;
-            
-            // Format tanggal
-            const now = new Date();
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-            const createdDate = `${now.getDate()} ${months[now.getMonth()]}, ${now.getFullYear()}`;
-            
-            // Tambahkan ke array accounts
-            accounts.push({
-                email: newEmail,
-                password: newPassword, // Add password to new account
-                type: newType,
-                status: newStatus,
-                lastActive: 'Just now', // Akun baru, jadi "Just now"
-                created: createdDate,
-                avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b9f86526-eded-469a-acb6-30531e52f3f6.png' // Avatar default
-            });
-            
-            // Di aplikasi nyata, kirim data ke server
+    document.getElementById('addForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        const newEmail = document.getElementById('newAccountEmail').value;
+        const newPassword = document.getElementById('newAccountPassword').value;
+        const newType = document.getElementById('newAccountType').value;
+        const newStatus = document.getElementById('newAccountStatus').value;
+
+        // Supabase akan otomatis mengisi created_at dan last_active jika default value diatur
+        const newAccountData = {
+            email: newEmail,
+            password: newPassword, // Ingat, ini harusnya hash password
+            type: newType,
+            status: newStatus,
+            avatar: 'https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b9f86526-eded-469a-acb6-30531e52f3f6.png'
+        };
+
+        try {
+            const { data, error } = await supabase
+                .from('accounts')
+                .insert([newAccountData]); // Masukkan data baru
+
+            if (error) {
+                throw error;
+            }
+
             alert('Akun berhasil ditambahkan!');
-            
-            // Perbarui tampilan dan reset form
-            renderAccounts(); // Render ulang tabel dan perbarui statistik
+            renderAccounts();
             hideAddModal();
-        });
+        } catch (error) {
+            console.error('Error adding account:', error.message);
+            alert('Gagal menambahkan akun: ' + error.message);
+        }
+    });
+    
 
         // Fungsi untuk toggle visibilitas password di form modal
         function togglePassword(id, icon) {

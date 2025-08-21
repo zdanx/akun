@@ -1,12 +1,12 @@
-                    {
-                      "build": {
-                        "env": {
-                          "SUPABASE_URL": "https://vipymadgirqtasaqvnpn.supabase.co",
-                          "SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZpcHltYWRnaXJxdGFzYXF2bnBuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU3MDA2NTUsImV4cCI6MjA3MTI3NjY1NX0.NFdHtPAinU7kjztZ8_6zrJT2lm5YIVi3tFPm5KdEKHk"
-                        }
-                      },
-                      "rewrites": [
-                        { "source": "/(.*)", "destination": "/index.html" }
-                      ]
-                    }
-                    
+{
+  "name": "gmail-admin-panel",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "sed -i 's|https://vipymadgirqtasaqvnpn.supabase.co|https://vipymadgirqtasaqvnpn.supabase.co|g' gmail_admin.html && sed -i 's|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...|eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...|g' gmail_admin.html",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "some-package": "^1.0.0"
+  }
+}
+
